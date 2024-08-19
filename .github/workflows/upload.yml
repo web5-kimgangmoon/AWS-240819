@@ -164,7 +164,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies of backend
-        woring-directory: ./back
+        working-directory: ./back
         run: npm i
 
       - name: Run Test of backend
