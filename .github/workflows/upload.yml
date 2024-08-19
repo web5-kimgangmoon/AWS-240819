@@ -131,8 +131,8 @@ jobs:
   test-frontend:
     runs-on: ubuntu-latest
     steps:
-       - name: Checkout repository
-         uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -143,16 +143,16 @@ jobs:
         woring-directory: ./front
         run: npm i
 
-       - name: Run Test of frontend
-         working-directory: ./front
-         run: npm test
+      - name: Run Test of frontend
+        working-directory: ./front
+        run: npm test
 
    deploy_backend:
       needs:
         - test_backend
         - test_node
         - test_mysql
-        
+
       runs-on: ubuntu-latest
       steps:
         - name: Checkout repository
@@ -202,17 +202,17 @@ jobs:
             echo PORT=${{ secrets.PORT }} >> .env
             echo MESSAGE=${{ secrets.MESSAGE }} >> .env'
 
-      - name: Start Server
-        run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" || {
-          echo "nvm.sh not found"
-          exit 1
-          }
+        - name: Start Server
+          run: |
+            ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" || {
+            echo "nvm.sh not found"
+            exit 1
+            }
 
-          nvm use --lts
+            nvm use --lts
 
-          npm install -g pm2
-          pm2 stop all
-          pm2 start /var/www/backend/index.js --name backend'
+            npm install -g pm2
+            pm2 stop all
+            pm2 start /var/www/backend/index.js --name backend'
