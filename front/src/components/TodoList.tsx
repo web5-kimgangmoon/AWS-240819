@@ -69,9 +69,9 @@ const TodoList = (): JSX.Element => {
             margin: "0",
           }}
         >
-          {data?.map((item: ITodo, idx: number) => (
+          {data?.map((item: ITodo) => (
             <li key={item.id} style={{ display: "table-row" }}>
-              <div style={{ display: "table-cell", columnCount: "2" }}>
+              <div style={{ display: "table-cell", padding: "1rem" }}>
                 {item.title}
               </div>
               <div style={{ display: "table-cell", padding: "1rem" }}>

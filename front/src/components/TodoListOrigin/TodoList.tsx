@@ -103,7 +103,7 @@ const TodoList = (): JSX.Element => {
       <h1>Todo List</h1>
       <div>
         <ul>
-          {data?.map((item: ITodo, idx: number) => (
+          {data?.map((item: ITodo) => (
             <li key={item.id}>
               <div>{item.title}</div>
               <div>

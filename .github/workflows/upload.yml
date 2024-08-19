@@ -232,7 +232,6 @@ jobs:
   deploy_frontEnd:
     needs:
       - test_frontend
-      - test_node
 
     runs-on: ubuntu-latest
     steps:
