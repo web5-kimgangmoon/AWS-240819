@@ -1,5 +1,8 @@
 import sequelize from "../database";
 import Todo from "../todo";
+import { config } from "dotenv";
+
+config();
 
 describe("Todo Test", () => {
   beforeAll(async () => {

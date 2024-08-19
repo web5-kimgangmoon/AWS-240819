@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import mysql2 from "mysql2";
 import path from "path";
 
-config({ path: path.join(__dirname, "..", ".env") });
+config({ path: path.join(__dirname, "../", ".env") });
 
 const sequelize = new Sequelize({
   dialect: "mysql",

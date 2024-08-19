@@ -2,9 +2,10 @@ import request from "supertest";
 import express, { Express } from "express";
 import { Sequelize } from "sequelize-typescript";
 import { config } from "dotenv";
-import path from "path";
+// import path from "path";
 
-config({ path: path.join(__dirname, "..", ".env") });
+config();
+// { path: path.join(__dirname, "..", ".env") }
 
 import router from "./todo2";
 import Todo from "../models/todo";
