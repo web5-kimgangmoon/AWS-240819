@@ -2,7 +2,7 @@ name: pratice
 
 on:
   push:
-    branches: main
+    branches: master
 
 jobs:
   test_node:
