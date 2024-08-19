@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 import cors from "cors";
 import todo from "./controllers/todo2";
 import Todo from "./models/todo";
-import sequelize from "./models/database";
 import path from "path";
 dotenv.config({ path: path.join(__dirname, ".env") });
+
+import sequelize from "./models/database";
 
 (async () => {
   sequelize.addModels([Todo]);
