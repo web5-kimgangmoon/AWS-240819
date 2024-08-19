@@ -7,10 +7,10 @@ describe("Test Axios", () => {
   test("Get /api", async () => {
     const data = "Now Testing";
 
-    mock.onGet("/api").reply(200, data);
+    mock.onGet("/").reply(200, data);
     // (instance.get as jest.Mock).mockResolvedValue("Now Testing");
 
-    const response = (await instance.get("/api")).data;
+    const response = (await instance.get("/")).data;
     expect(response).toBe("Now Testing");
   });
 });

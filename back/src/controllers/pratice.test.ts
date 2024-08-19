@@ -3,10 +3,11 @@ import express, { Express } from "express";
 import { Sequelize } from "sequelize-typescript";
 import { config } from "dotenv";
 
-config();
+config({ path: path.join(__dirname, "..", ".env") });
 
 import router from "./todo2";
 import Todo from "../models/todo";
+import path from "path";
 
 jest.mock("sequelize-typescript", () => {
   const actual = jest.requireActual("sequelize-typescript");
