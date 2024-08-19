@@ -263,7 +263,10 @@ jobs:
 
       - name: Run Build of  frontend
         working-directory: ./front
-        run: npm run build
+        run: |
+          npm run build;
+          then
+          sudo  rm -rf ./build/**/*/*.map'
 
       - name: Copy Files to EC2
         run: |
@@ -286,4 +289,3 @@ jobs:
 
           cd /var/www/frontend
           npm i --production
-          sudo  rm -rf ./**/*/*.map'
