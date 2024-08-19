@@ -1,21 +1,61 @@
 import { useState, useCallback, ChangeEvent, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Todo as ITodo } from "../lib/todoAxios";
-import useGetList from "../customQuery/useGetList";
-import useAdd from "../customMutation/useAdd";
-import useDelete from "../customMutation/useDelete";
-import useUpdate from "../customMutation/useUpdate";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getList,
+  addList,
+  patchList,
+  deleteList,
+  Todo as ITodo,
+  Todo,
+} from "../../lib/todoAxios";
 
 const TodoList = (): JSX.Element => {
   const client = useQueryClient();
   const [text, setText] = useState<string>("");
-  const { data, isError, isLoading, error } = useGetList();
-  const adder = useAdd(client, setText);
-  const update = useUpdate(client);
-  const deleteTodo = useDelete(client);
-  const previousAction: { action: string; data: ITodo[]; getTime: number } =
+  const { data, isError, isLoading, error, refetch } = useQuery({
+    queryKey: ["get", "/todo"],
+    queryFn: getList,
+  });
+  const adder = useMutation({
+    mutationKey: ["post", "/todo"],
+    mutationFn: async () => {
+      return { data: [await addList(text)], getTime: Date.now() };
+    },
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ["get", "/todo"] });
+      setText("");
+    },
+    onError: () => {
+      console.log("에러발생");
+    },
+  });
+  const update = useMutation({
+    mutationKey: ["patch", "/todo"],
+    mutationFn: async (todo: ITodo) => {
+      return { data: [await patchList(todo)], getTime: Date.now() };
+    },
+    onSuccess: () => {
+      refetch();
+    },
+    onError: () => {
+      console.log("에러발생");
+    },
+  });
+  const deleteTodo = useMutation({
+    mutationKey: ["deleteTodo", "/todo"],
+    mutationFn: async (id: number) => {
+      return { data: await deleteList(id), getTime: Date.now() };
+    },
+    onSuccess: () => {
+      refetch();
+    },
+    onError: () => {
+      console.log("에러발생");
+    },
+  });
+  const previousAction: { action: string; data: Todo[]; getTime: number } =
     useMemo(() => {
-      let temp: { action: string; data: ITodo[]; getTime: number } = {
+      let temp: { action: string; data: Todo[]; getTime: number } = {
         action: "none",
         data: [],
         getTime: 0,
@@ -51,9 +91,9 @@ const TodoList = (): JSX.Element => {
     []
   );
   const add = useCallback(async () => {
-    await adder.mutate(text);
-  }, [setText, text, setText]);
-
+    await adder.mutate();
+    setText("");
+  }, [setText, adder, text]);
   if (isLoading || adder.isPending || deleteTodo.isPending || update.isPending)
     return <div>now Loading</div>;
   if (isError) return <div>{error.message}</div>;
@@ -62,21 +102,12 @@ const TodoList = (): JSX.Element => {
     <div>
       <h1>Todo List</h1>
       <div>
-        <ul
-          style={{
-            display: "table",
-            padding: "0",
-            margin: "0",
-          }}
-        >
+        <ul>
           {data?.map((item: ITodo, idx: number) => (
-            <li key={item.id} style={{ display: "table-row" }}>
-              <div style={{ display: "table-cell", columnCount: "2" }}>
-                {item.title}
-              </div>
-              <div style={{ display: "table-cell", padding: "1rem" }}>
+            <li key={item.id}>
+              <div>{item.title}</div>
+              <div>
                 <button
-                  title={"completeBtn"}
                   onClick={async () =>
                     await update.mutate({
                       ...item,
@@ -87,11 +118,8 @@ const TodoList = (): JSX.Element => {
                   {item.isCompleted ? "완료" : "진행중"}
                 </button>
               </div>
-              <div style={{ display: "table-cell" }}>
-                <button
-                  title={"deleteBtn"}
-                  onClick={async () => await deleteTodo.mutate(item.id)}
-                >
+              <div>
+                <button onClick={async () => await deleteTodo.mutate(item.id)}>
                   삭제
                 </button>
               </div>
@@ -103,16 +131,15 @@ const TodoList = (): JSX.Element => {
         <input onChange={onChagne} />
         <button onClick={add}>Add Todo</button>
       </div>
+      {}
       <div>
         <div>지난 작업</div>
-        <div title={"action"}>{previousAction["action"]}</div>
+        <div id="previousAction">{previousAction["action"]}</div>
         <div>받은 데이터</div>
-        <div title="previous_data">
+        <div id="actionResData">
           {previousAction.data.length !== 0
             ? previousAction["data"].map((item) => (
-                <span key={item.id} style={{ display: "block" }}>
-                  {item.title}
-                </span>
+                <span style={{ display: "block" }}>{item.title}</span>
               ))
             : "없음"}
         </div>

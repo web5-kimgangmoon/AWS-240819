@@ -63,9 +63,17 @@ describe("Test Todo List", () => {
       data.push({ title: text, id: data.length + 1, isCompleted: false });
       await fireEvent.click(buttonElem);
       await waitFor(() => {
-        const listItemElem = screen.getByText(text);
+        const actionElem = screen.getByTitle("action", { exact: true });
+        expect(actionElem).toBeInTheDocument();
+        expect(actionElem.tagName).toBe("DIV");
+        expect(actionElem.textContent).toBe("add");
+
+        const listItemElem = screen.getByTitle("previous_data", {
+          exact: true,
+        });
         expect(listItemElem).toBeInTheDocument();
         expect(listItemElem.tagName).toBe("DIV");
+        expect(listItemElem.childNodes[0].textContent).toBe(text);
       });
     };
 
@@ -77,10 +85,8 @@ describe("Test Todo List", () => {
   });
 
   test("patch todo", async () => {
-    const listeItemElems = await screen.findAllByRole("button", {
-      name: "진행중" || "완료",
-    });
-    expect(listeItemElems[0]).toBeInTheDocument();
+    const listBtn = await screen.getAllByTitle("completeBtn", { exact: true });
+    expect(listBtn[0]).toBeInTheDocument();
 
     const data1 = { id: 1, title: "test todo list", isCompleted: true };
 
@@ -93,17 +99,25 @@ describe("Test Todo List", () => {
         .reply(200, { title: text, id: data[index].id, isCompleted });
       data[index] = { title: text, id: data[index].id, isCompleted };
 
-      fireEvent.click(listeItemElems[index]);
+      fireEvent.click(listBtn[index]);
 
       await waitFor(async () => {
-        const listItemElem = screen.getByText(text);
+        const actionElem = screen.getByTitle("action", { exact: true });
+        expect(actionElem).toBeInTheDocument();
+        expect(actionElem.tagName).toBe("DIV");
+        expect(actionElem.textContent).toBe("update");
+
+        const listItemElem = screen.getByTitle("previous_data", {
+          exact: true,
+        });
         expect(listItemElem).toBeInTheDocument();
         expect(listItemElem.tagName).toBe("DIV");
+        expect(listItemElem.childNodes[0].textContent).toBe(text);
 
-        const listeItemElemsRe = await screen.findAllByRole("button", {
-          name: "진행중" || "완료",
+        const listBtn = await screen.findAllByTitle("completeBtn", {
+          exact: true,
         });
-        expect(listeItemElemsRe[index].textContent).toEqual(
+        expect(listBtn[index].textContent).toBe(
           isCompleted ? "완료" : "진행중"
         );
       });
@@ -111,10 +125,8 @@ describe("Test Todo List", () => {
     await patch({ text: data1.title, isCompleted: data1.isCompleted }, 0);
   });
   test("delete todo", async () => {
-    const listeItemElems = await screen.findAllByRole("button", {
-      name: "삭제",
-    });
-    expect(listeItemElems[0]).toBeInTheDocument();
+    const listBtn = await screen.getAllByTitle("deleteBtn", { exact: true });
+    expect(listBtn[0]).toBeInTheDocument();
 
     const deleteTodo = async (index: number) => {
       const beforeLength = data.length;
@@ -125,13 +137,22 @@ describe("Test Todo List", () => {
       );
       data.splice(index, 1);
 
-      fireEvent.click(listeItemElems[index]);
+      fireEvent.click(listBtn[index]);
 
       await waitFor(async () => {
-        const list = await screen.findAllByRole("listitem");
-        for (let item of list) {
-          expect(item.childNodes[0].textContent).not.toBe(target.title);
-        }
+        const actionElem = screen.getByTitle("action");
+        expect(actionElem).toBeInTheDocument();
+        expect(actionElem.tagName).toBe("DIV");
+        expect(actionElem.textContent).toBe("delete");
+
+        const listItemElem = screen.getByTitle("previous_data");
+        expect(listItemElem).toBeInTheDocument();
+        expect(listItemElem.tagName).toBe("DIV");
+
+        listItemElem.childNodes.forEach((item) => {
+          expect(item.textContent).not.toBe(target.title);
+        });
+
         expect(data.length).toBe(beforeLength - 1);
       });
     };
