@@ -17,7 +17,6 @@ const TodoList = (): JSX.Element => {
     mutationKey: ["post", "/todo"],
     mutationFn: async (text: string) => {
       return await addList(text);
-      // if (data) setAdderList((temp) => [...temp, data]);
     },
     onSuccess: () => {
       setText("");
@@ -31,7 +30,6 @@ const TodoList = (): JSX.Element => {
     mutationKey: ["patch", "/todo"],
     mutationFn: async (todo: ITodo) => {
       return await patchList(todo);
-      // if (data) setAdderList((temp) => [...temp, data]);
     },
     onSuccess: () => {
       refetch();
@@ -44,7 +42,6 @@ const TodoList = (): JSX.Element => {
     mutationKey: ["deleteTodo", "/todo"],
     mutationFn: async (id: number) => {
       return await deleteList(id);
-      // if (data) setAdderList((temp) => [...temp, data]);
     },
     onSuccess: () => {
       refetch();
@@ -54,7 +51,6 @@ const TodoList = (): JSX.Element => {
     },
   });
   const [text, setText] = useState<string>("");
-  // const [adderList, setAdderList] = useState<ITodo[]>([]);
 
   const onChagne = useCallback(
     ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
@@ -64,19 +60,12 @@ const TodoList = (): JSX.Element => {
   );
   const addTodo = useCallback(
     async () => await adder.mutate(text),
-    // const data = await addList(text);
-    // setAdderList((temp) => [...temp, data]);
 
     [text]
   );
   if (isLoading) return <div>now Loading</div>;
   if (isError) return <div>{error.message}</div>;
-  // const [list, setList] = useState<string[]>([]);
 
-  // const addTodo = useCallback(() => {
-  //   setList((state) => [...state, text]);
-  //   setText("");
-  // }, [text]);
   return (
     <div>
       <h1>Todo List</h1>
@@ -104,28 +93,11 @@ const TodoList = (): JSX.Element => {
               </div>
             </li>
           ))}
-          {/* {adder.data ? <li key={adder.data.id}>{adder.data.title}</li> : ""} */}
-          {/* {adderList.map((item: ITodo, idx: number) => (
-            <li key={item.id}>{item.title}</li>
-          ))} */}
         </ul>
       </div>
       <div>
-        <input
-          // onChange={(e) => {
-          //   setText(e.target.value);
-          // }}
-          onChange={onChagne}
-        />
-        <button
-          // onClick={() => {
-          //   setList((list) => [...list, text]);
-          // }}
-          // onClick={addTodo}
-          onClick={addTodo}
-        >
-          Add Todo
-        </button>
+        <input onChange={onChagne} />
+        <button onClick={addTodo}>Add Todo</button>
       </div>
     </div>
   );

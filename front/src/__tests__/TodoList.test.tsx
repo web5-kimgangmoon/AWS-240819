@@ -57,18 +57,12 @@ describe("Test Todo List", () => {
     });
 
     const sendAdd = async (text: string) => {
-      let response:
-        | { title: string; id: number; isCompleted: boolean }
-        | undefined = undefined;
-      const transport = function () {
-        response = { title: text, id: data.length + 1, isCompleted: false };
-        return { ...response };
-      };
-      mock.onPost("/todo", { title: text }).reply(201, transport());
+      mock
+        .onPost("/todo", { title: text })
+        .reply(201, { title: text, id: data.length + 1, isCompleted: false });
       data.push({ title: text, id: data.length + 1, isCompleted: false });
       await fireEvent.click(buttonElem);
       await waitFor(() => {
-        expect(response).toEqual(data[data.length - 1]);
         const listItemElem = screen.getByText(text);
         expect(listItemElem).toBeInTheDocument();
         expect(listItemElem.tagName).toBe("DIV");
@@ -84,7 +78,7 @@ describe("Test Todo List", () => {
 
   test("patch todo", async () => {
     const listeItemElems = await screen.findAllByRole("button", {
-      name: "진행중",
+      name: "진행중" || "완료",
     });
     expect(listeItemElems[0]).toBeInTheDocument();
 
@@ -94,33 +88,20 @@ describe("Test Todo List", () => {
       { text, isCompleted }: { text: string; isCompleted: boolean },
       index: number
     ) => {
-      let response:
-        | { title: string; id: number; isCompleted: boolean }
-        | undefined = undefined;
-
-      const transport = function (data: {
-        title: string;
-        id: number;
-        isCompleted: boolean;
-      }) {
-        response = data;
-        return { ...response };
-      };
-
       mock
         .onPatch("/todo", { title: text, id: data[index].id, isCompleted })
-        .reply(
-          200,
-          transport({ title: text, id: data[index].id, isCompleted })
-        );
+        .reply(200, { title: text, id: data[index].id, isCompleted });
       data[index] = { title: text, id: data[index].id, isCompleted };
 
       fireEvent.click(listeItemElems[index]);
 
       await waitFor(async () => {
-        expect(response).toEqual(data[index]);
+        const listItemElem = screen.getByText(text);
+        expect(listItemElem).toBeInTheDocument();
+        expect(listItemElem.tagName).toBe("DIV");
+
         const listeItemElemsRe = await screen.findAllByRole("button", {
-          name: "완료" || "진행중",
+          name: "진행중" || "완료",
         });
         expect(listeItemElemsRe[index].textContent).toEqual(
           isCompleted ? "완료" : "진행중"
@@ -137,28 +118,20 @@ describe("Test Todo List", () => {
 
     const deleteTodo = async (index: number) => {
       const beforeLength = data.length;
-      let response:
-        | Array<{ title: string; id: number; isCompleted: boolean }>
-        | undefined = undefined;
-
-      const transport = function (target: {
-        title: string;
-        id: number;
-        isCompleted: boolean;
-      }) {
-        response = data.filter((item) => item !== target);
-        return { ...response };
-      };
-
-      mock
-        .onDelete(`/todo/${data[index].id}`)
-        .reply(200, transport(data[index]));
+      const target = { ...data[index] };
+      mock.onDelete(`/todo/${data[index].id}`).reply(
+        200,
+        data.filter((item) => item !== data[index])
+      );
       data.splice(index, 1);
 
       fireEvent.click(listeItemElems[index]);
 
       await waitFor(async () => {
-        expect(response).toEqual(data);
+        const list = await screen.findAllByRole("listitem");
+        for (let item of list) {
+          expect(item.childNodes[0].textContent).not.toBe(target.title);
+        }
         expect(data.length).toBe(beforeLength - 1);
       });
     };

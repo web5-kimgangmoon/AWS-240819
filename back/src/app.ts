@@ -4,8 +4,8 @@ import cors from "cors";
 import todo from "./controllers/todo2";
 import Todo from "./models/todo";
 import sequelize from "./models/database";
-// import path from "path";
-dotenv.config();
+import path from "path";
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 (async () => {
   sequelize.addModels([Todo]);
