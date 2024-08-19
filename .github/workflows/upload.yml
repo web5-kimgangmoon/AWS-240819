@@ -44,7 +44,7 @@ jobs:
 
       - name: Run mySQL commands
         run: |
-          mysql -h "127.0.0.1" -P 3308 -u ${{ secret.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }} -e "SHOW DATABASES;"
+          mysql -h "127.0.0.1" -P 3308 -u ${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }} -e "SHOW DATABASES;"
 
       - name: set env
         working-directory: ./back
