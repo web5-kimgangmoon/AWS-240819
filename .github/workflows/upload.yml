@@ -276,15 +276,6 @@ jobs:
             fi
             mkdir /var/www/frontend'
           rsync -avz -e "ssh" ./front/build/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/frontend
-          rsync -avz -e "ssh" ./front/package.json ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/frontend/package.json
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" || {
-          echo "nvm.sh not found"
-          exit 1
-          }
 
-          nvm use --lts
-
-          cd /var/www/frontend
-          npm i --production'
+      - name: Restart Nginx
+        run: ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'sudo service nginx restart'
