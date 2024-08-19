@@ -147,72 +147,72 @@ jobs:
         working-directory: ./front
         run: npm test
 
-   deploy_backend:
-      needs:
-        - test_backend
-        - test_node
-        - test_mysql
+  deploy_backend:
+    needs:
+      - test_backend
+      - test_node
+      - test_mysql
 
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v4
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-        - name: Set up Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: "20"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
-        - name: Install dependencies of backend
-          woring-directory: ./back
-          run: npm i
+      - name: Install dependencies of backend
+        woring-directory: ./back
+        run: npm i
 
-        - name: Run Test of backend
-          working-directory: ./back
-          run: npm run build
+      - name: Run Test of backend
+        working-directory: ./back
+        run: npm run build
 
-        - name: Copy Files to EC2
-          run: |
-            ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
-             if [ -d "/var/www/backend" ];
-             then
-             rm -rf /var/www/backend
-             fi
-             mkdir /var/www/backend'
-            rsync -avz -e "ssh" ./back/build/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/backend
-            rsync -avz -e "ssh" ./back/package.json ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/backend/package.json
-            ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" || {
-            echo "nvm.sh not found"
-            exit 1
-            }
+      - name: Copy Files to EC2
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
+           if [ -d "/var/www/backend" ];
+           then
+           rm -rf /var/www/backend
+           fi
+           mkdir /var/www/backend'
+          rsync -avz -e "ssh" ./back/build/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/backend
+          rsync -avz -e "ssh" ./back/package.json ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/backend/package.json
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" || {
+          echo "nvm.sh not found"
+          exit 1
+          }
 
-            nvm -v
-            nvm use --lts
+          nvm -v
+          nvm use --lts
 
-            cd  /var/www/backend
-            npm i --production
-            echo MYSQL_HOST=${{ secrets.MYSQL_HOST }} > .env
-            echo MYSQL_USER=${{ secrets.MYSQL_USER }} >> .env
-            echo MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} >> .env
-            echo MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} >> .env
-            echo MYSQL_PORT=${{ secrets.MYSQL_PORT }} >> .env
-            echo >> .env
-            echo PORT=${{ secrets.PORT }} >> .env
-            echo MESSAGE=${{ secrets.MESSAGE }} >> .env'
+          cd  /var/www/backend
+          npm i --production
+          echo MYSQL_HOST=${{ secrets.MYSQL_HOST }} > .env
+          echo MYSQL_USER=${{ secrets.MYSQL_USER }} >> .env
+          echo MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} >> .env
+          echo MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} >> .env
+          echo MYSQL_PORT=${{ secrets.MYSQL_PORT }} >> .env
+          echo >> .env
+          echo PORT=${{ secrets.PORT }} >> .env
+          echo MESSAGE=${{ secrets.MESSAGE }} >> .env'
 
-        - name: Start Server
-          run: |
-            ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" || {
-            echo "nvm.sh not found"
-            exit 1
-            }
+      - name: Start Server
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" || {
+          echo "nvm.sh not found"
+          exit 1
+          }
 
-            nvm use --lts
+          nvm use --lts
 
-            npm install -g pm2
-            pm2 stop all
-            pm2 start /var/www/backend/index.js --name backend'
+          npm install -g pm2
+          pm2 stop all
+          pm2 start /var/www/backend/index.js --name backend'
