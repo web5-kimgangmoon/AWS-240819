@@ -1,0 +1,54 @@
+name: pratice
+
+on:
+  push:
+    branches: main
+
+jobs:
+  test_node:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:latest
+        ports:
+          - ${{ secrets.MYSQL_PORT }}:${{ secrets.MYSQL_PORT }}
+        env:
+          MYSQL_ROOT_PASSWORD: 1234qwer
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: set env
+        working-directory: ./back
+        run: |
+          echo MYSQL_HOST=${{ secrets.MYSQL_HOST }} > .env
+          echo MYSQL_USER=${{ secrets.MYSQL_USER }} >> .env
+          echo MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} >> .env
+          echo MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} >> .env
+          echo MYSQL_PORT=${{ secrets.MYSQL_PORT }} >> .env
+          echo >> .env
+          echo PORT=${{ secrets.PORT }} >> .env
+          echo MESSAGE=${{ secrets.MESSAGE }} >> .env
+
+      - name: Install dependencies of backend
+        working-directory: ./back
+        run: npm i
+
+      - name: Run Test of Backend
+        working-directory: ./back
+        run: npm test
