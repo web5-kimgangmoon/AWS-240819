@@ -2,12 +2,12 @@ import request from "supertest";
 import express, { Express } from "express";
 import { Sequelize } from "sequelize-typescript";
 import { config } from "dotenv";
+import path from "path";
 
 config({ path: path.join(__dirname, "..", ".env") });
 
 import router from "./todo2";
 import Todo from "../models/todo";
-import path from "path";
 
 jest.mock("sequelize-typescript", () => {
   const actual = jest.requireActual("sequelize-typescript");
@@ -57,11 +57,11 @@ describe("Test todo", () => {
 
     const sequelize = new Sequelize({
       dialect: "mysql",
-      host: "localhost",
-      username: "kim",
-      password: "1234qwer",
-      database: "test",
-      port: 3308,
+      host: process.env.MYSQL_HOST,
+      username: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE,
+      port: process.env.MYSQL_PORT ? +process.env.MYSQL_PORT : 3308,
     });
 
     await sequelize.sync({ force: true });

@@ -52,7 +52,7 @@ const TodoList = (): JSX.Element => {
   );
   const add = useCallback(async () => {
     await adder.mutate(text);
-  }, [setText, text, setText]);
+  }, [adder, text, setText]);
 
   if (isLoading || adder.isPending || deleteTodo.isPending || update.isPending)
     return <div>now Loading</div>;
