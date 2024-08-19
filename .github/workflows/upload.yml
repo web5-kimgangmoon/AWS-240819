@@ -163,11 +163,24 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.EC2_KEY }}
+
+      - name: Ensure SSH directory exists
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+      - name: Add SSH known hosts
+        run: ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
       - name: Install dependencies of backend
         working-directory: ./back
         run: npm i
 
-      - name: Run Test of backend
+      - name: Run Build of backend
         working-directory: ./back
         run: npm run build
 
