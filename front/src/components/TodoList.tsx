@@ -54,7 +54,11 @@ const TodoList = (): JSX.Element => {
     await adder.mutate(text);
   }, [adder, text]);
 
-  if (isLoading || adder.isPending || deleteTodo.isPending || update.isPending)
+  if (
+    isLoading ||
+    adder.isPending
+    //  || deleteTodo.isPending || update.isPending
+  )
     return <div>now Loading</div>;
   if (isError) return <div>{error.message}</div>;
 
